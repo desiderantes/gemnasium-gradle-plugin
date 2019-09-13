@@ -17,7 +17,6 @@ class GemnasiumGradlePluginKotlinPluginTest {
         project.plugins.apply("com.gemnasium.gradle-plugin")
 
         // Verify the result
-        assertNotNull(project.tasks.findByName("greeting"))
         assertNotNull(project.tasks.findByName("gemnasiumDumpDependencies"))
     }
 }

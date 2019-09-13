@@ -9,6 +9,7 @@
 plugins {
     kotlin("jvm") version "1.3.50"
     id("java-gradle-plugin")
+    id("maven-publish")
 }
 
 repositories {
@@ -19,6 +20,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.9.9.2")
 
     // Use the Kotlin test library.
     testImplementation(kotlin("test"))
@@ -54,4 +56,16 @@ val functionalTest by tasks.creating(Test::class) {
 val check by tasks.getting(Task::class) {
     // Run the functional tests as part of `check`
     dependsOn(functionalTest)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("pluginMaven") {
+            groupId = "com.gemnasium"
+            artifactId = "gradle-plugin"
+            version = "0.1"
+
+            //from(components["java"])
+        }
+    }
 }
