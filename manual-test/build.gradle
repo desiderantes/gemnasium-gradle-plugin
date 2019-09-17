@@ -10,10 +10,18 @@ buildscript {
 
 plugins {
   id('java')
-  //id('com.gemnasium.gradle-plugin')
+  //id('com.gemnasium.gradle-plugin') version '0.1'
 }
 
 apply plugin: 'com.gemnasium.gradle-plugin'
+
+gemnasiumGradlePlugin {
+	//outputDir = file('.')
+    //outputFileName = "foo.json"
+    //skipTestGroups = false
+    //skipConfigurations = ['compile']
+	//scanConfigurations = ['compileClasspath']
+}
 
 repositories {
   mavenCentral()
@@ -24,7 +32,7 @@ dependencies {
   compile group: 'io.grpc', name: 'grpc-core', version:'1.19.0'
   compile group: 'com.google.code.gson', name: 'gson', version:'2.7'
   compile group: 'org.apache.hadoop', name: 'hadoop-common', version:'3.2.0'
-  compile group: 'org.apache.struts', name: 'struts2-core', version:'2.5.12'
+  compile group: 'org.apache.struts', name: 'struts2-core', version:'2.5.10'
   compile group: 'org.mindrot', name: 'jbcrypt', version:'0.3m'
   compile group: 'org.springframework', name: 'spring-web', version:'3.1.1.RELEASE'
   compile group: 'org.apache.sling', name: 'org.apache.sling.engine', version:'2.0.4-incubator'

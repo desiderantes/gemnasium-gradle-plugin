@@ -3,18 +3,16 @@
  */
 package com.gemnasium
 
+import com.gemnasium.extension.GemnasiumGradlePluginExtension
+import com.gemnasium.extension.GemnasiumGradlePluginExtension.Companion.PLUGIN_EXTENSION_NAME
 import com.gemnasium.tasks.DumpDependenciesTask
 import org.gradle.api.Project
 import org.gradle.api.Plugin
 
 open class GemnasiumGradlePlugin: Plugin<Project> {
     override fun apply(project: Project) {
-        // Register a task
-        project.tasks.register("greeting") { task ->
-            task.doLast {
-                println("Hello from plugin 'com.gemnasium.gradle-plugin'")
-            }
-        }
-        project.tasks.register(DumpDependenciesTask.TASK_NAME, DumpDependenciesTask::class.java)
+        project.extensions.create(PLUGIN_EXTENSION_NAME, GemnasiumGradlePluginExtension::class.java, project)
+        // Create the task. We use tasks.create rather than tasks.register to be compatible with Gradle 3
+        project.tasks.create(DumpDependenciesTask.TASK_NAME, DumpDependenciesTask::class.java)
     }
 }

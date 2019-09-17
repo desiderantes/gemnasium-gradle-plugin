@@ -3,6 +3,8 @@
  */
 package com.gemnasium
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import kotlin.test.Test
@@ -15,25 +17,50 @@ class GemnasiumGradlePluginFunctionalTest {
     @Test fun `can run task`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
+        projectDir.deleteRecursively()
         projectDir.mkdirs()
+
+        //val buildDirValue =
+        val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
-        projectDir.resolve("build.gradle").writeText("""
+        val buildFile = projectDir.resolve("build.gradle")
+        buildFile.writeText("""
             plugins {
                 id('com.gemnasium.gradle-plugin')
+                id('java')
+            }
+            
+            repositories {
+                mavenCentral()
+            }
+
+            dependencies {
+                compile group: 'org.aeonbits.owner', name: 'owner', version:'1.0.10'            
+            }
+            
+            gemnasiumGradlePlugin {
+                outputFileName = '${outputFileNameValue}'
             }
         """)
+        //println(buildFile.readText())
 
         // Run the build
         val runner = GradleRunner.create()
         runner.forwardOutput()
         runner.withPluginClasspath()
-        //runner.withArguments("greeting gemnasiumDumpDependencies")
         runner.withArguments("gemnasiumDumpDependencies")
         runner.withProjectDir(projectDir)
         val result = runner.build();
 
         // Verify the result
-        //assertTrue(result.output.contains("Hello from plugin 'com.gemnasium.gradle-plugin'"))
-        assertTrue(result.output.contains("hello from dump dependencies in kotlin"))
+        val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
+
+        assertTrue(result.output.contains("Writing dependency JSON to"))
+        assertTrue(outputFile.exists())
+
+        // Verify that output file contains valid JSON content
+        val parser = ObjectMapper().factory.createParser(outputFile)
+        while (parser.nextToken() != null) {}
+        // we have valid json
     }
 }

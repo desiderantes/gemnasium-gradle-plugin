@@ -33,7 +33,7 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("elasticmq") {
+        create("gradle-plugin") {
             id = "com.gemnasium.gradle-plugin"
             implementationClass = "com.gemnasium.GemnasiumGradlePlugin"
         }
