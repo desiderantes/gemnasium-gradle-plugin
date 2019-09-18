@@ -4,6 +4,10 @@ The Gemnasium Gradle plugin facilitates support for using Gemnasium to scan Grad
 
 This plugin was developed in order to add dependency scanning support for Gradle projects to GitLab and will be used by the GitLab CI system for that purpose. As such, it will probably not be of much use to anyone else.
 
+The implementation borrows heavily from the following projects:
+ * https://github.com/jeremylong/dependency-check-gradle
+ * https://github.com/gemnasium/gemnasium-maven-plugin
+
 ## How to install it?
 
 TODO - deployment / adding the plugin to your gradle project / using Gradle init scripts?

@@ -9,6 +9,7 @@
 plugins {
     kotlin("jvm") version "1.3.50"
     id("java-gradle-plugin")
+    id("com.gradle.plugin-publish") version "0.10.1"
     id("maven-publish")
 }
 
@@ -33,11 +34,19 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("gradle-plugin") {
+        create("gemnasium-gradle-plugin") {
             id = "com.gemnasium.gradle-plugin"
             implementationClass = "com.gemnasium.GemnasiumGradlePlugin"
+            displayName = "Gemnasium Gradle Plugin"
+            description = "A Gradle plugin to produce a dependency report in JSON format that Gemnasium can use for a dependency vulnerability scan"
         }
     }
+}
+
+pluginBundle {
+    website = "https://gitlab.com/stfs/gemnasium-gradle-plugin"
+    vcsUrl = "https://gitlab.com/stfs/gemnasium-gradle-plugin.git"
+    tags = listOf("gemnasium", "dependency", "dependencies", "dependency-check", "security", "gitlab")
 }
 
 // Add a source set for the functional test suite
