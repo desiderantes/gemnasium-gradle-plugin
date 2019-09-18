@@ -3,6 +3,7 @@
  */
 package com.gemnasium
 
+import com.gemnasium.tasks.DumpDependenciesTask
 import org.gradle.testfixtures.ProjectBuilder
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -11,13 +12,12 @@ import kotlin.test.assertNotNull
  * A simple unit test for the 'com.gemnasium.greeting' plugin.
  */
 class GemnasiumGradlePluginKotlinPluginTest {
-    @Test fun `plugin registers task`() {
+    @Test fun `plugin registers the dump dependencies task`() {
         // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.gemnasium.gradle-plugin")
 
-        // Verify the result
-        assertNotNull(project.tasks.findByName("gemnasiumDumpDependencies"))
+        // Verify that the project added the DumpDependenciesTask
+        assertNotNull(project.tasks.findByName(DumpDependenciesTask.TASK_NAME))
     }
 }
-

@@ -3,7 +3,6 @@
  */
 package com.gemnasium
 
-import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
@@ -61,6 +60,8 @@ class GemnasiumGradlePluginFunctionalTest {
         // Verify that output file contains valid JSON content
         val parser = ObjectMapper().factory.createParser(outputFile)
         while (parser.nextToken() != null) {}
-        // we have valid json
+
+        // Verify that the dependency we had in our gradle project is in the output file
+        assertTrue(outputFile.readText().contains("org.aeonbits.owner"))
     }
 }
