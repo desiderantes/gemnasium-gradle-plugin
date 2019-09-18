@@ -6,6 +6,9 @@
  * User Manual available at https://docs.gradle.org/5.5.1/userguide/custom_plugins.html
  */
 
+group = "com.gemnasium"
+version = "0.1"
+
 plugins {
     kotlin("jvm") version "1.3.50"
     id("java-gradle-plugin")
@@ -72,7 +75,6 @@ publishing {
         create<MavenPublication>("pluginMaven") {
             groupId = "com.gemnasium"
             artifactId = "gradle-plugin"
-            version = "0.1"
 
             //from(components["java"])
         }
