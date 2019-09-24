@@ -14,7 +14,7 @@ allprojects {
   
   gemnasiumGradlePlugin {
     //outputDir = file('.')
-    outputFileName = "gradle-dependencies.json"
+    //outputFileName = "gradle-dependencies.json"
     //skipTestGroups = false
     //skipConfigurations = ['compile']
     //scanConfigurations = ['compileClasspath']
