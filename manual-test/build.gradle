@@ -1,29 +1,36 @@
+// This build script applies the Gemnasium Gradle Plugin explicitly.
+// The same file build script works for Gradle versions 3, 4 and 5
+
 buildscript {
   repositories {
-	  mavenLocal()
-      mavenCentral()
-	}
-	dependencies {
-	  classpath 'com.gemnasium:gradle-plugin:0.1'
-	}
+    // Enable for plugin development (publish with './gradlew publishToMavenLocal')
+    //mavenLocal()
+    mavenCentral()
+  }
+  // Old-style plugin mechanism (also needed for plugin development via mavenLocal repository)
+  //dependencies {
+  //  classpath 'com.gemnasium:gradle-plugin:0.1'
+  //}
 }
 
 plugins {
   id('java')
-  //id('com.gemnasium.gradle-plugin') version '0.1'
+  // New-style plugin mechanism (needs to be published to plugins.gradle.org repository)
+  id('com.gemnasium.gradle-plugin') version '0.1'
 }
 
-apply plugin: 'com.gemnasium.gradle-plugin'
+//apply plugin: 'com.gemnasium.gradle-plugin'
 
 gemnasiumGradlePlugin {
-	//outputDir = file('.')
-    //outputFileName = "foo.json"
-    //skipTestGroups = false
-    //skipConfigurations = ['compile']
-	//scanConfigurations = ['compileClasspath']
+  //outputDir = file('.')
+  //outputFileName = "foo.json"
+  //skipTestGroups = false
+  //skipConfigurations = ['compile']
+  //scanConfigurations = ['compileClasspath']
 }
 
 repositories {
+  jcenter()
   mavenCentral()
 }
 
