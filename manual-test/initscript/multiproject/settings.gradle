@@ -1,0 +1,6 @@
+rootProject.name = 'myrootproject'
+rootProject.buildFileName = "build.gradle"
+
+include 'subA:subprjA'
+include 'subB:subprjB'
+include 'subB:subprjC'

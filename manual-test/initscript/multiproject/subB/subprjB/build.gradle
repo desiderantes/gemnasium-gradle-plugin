@@ -1,0 +1,6 @@
+
+task doesntDoMuch {
+  doLast {
+    println 'This is just a NOOP task for a non-java subproject'
+  }
+}

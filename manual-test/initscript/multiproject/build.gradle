@@ -1,0 +1,17 @@
+allprojects {
+  repositories {
+    jcenter()
+    mavenCentral()
+  }
+}
+
+def javaProjects() {
+  subprojects.findAll{ prj -> prj.plugins.hasPlugin('java') }
+}
+
+configure(javaProjects()) {
+  // Common repositories
+  dependencies {
+    testCompile 'junit:junit:4.12'
+  }
+}
