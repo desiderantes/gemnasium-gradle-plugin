@@ -64,4 +64,45 @@ class GemnasiumGradlePluginFunctionalTest {
         // Verify that the dependency we had in our gradle project is in the output file
         assertTrue(outputFile.readText().contains("org.aeonbits.owner"))
     }
+
+    @Test fun `empty project does not produce output file`() {
+        // Setup the test build
+        val projectDir = File("build/functionalTest")
+        projectDir.deleteRecursively()
+        projectDir.mkdirs()
+
+        //val buildDirValue =
+        val outputFileNameValue = "deps.json"
+        projectDir.resolve("settings.gradle").writeText("")
+        val buildFile = projectDir.resolve("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id('com.gemnasium.gradle-plugin')
+                id('java')
+            }
+            
+            repositories {
+                mavenCentral()
+            }
+
+            gemnasiumGradlePlugin {
+                outputFileName = '${outputFileNameValue}'
+            }
+        """)
+        //println(buildFile.readText())
+
+        // Run the build
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("gemnasiumDumpDependencies")
+        runner.withProjectDir(projectDir)
+        val result = runner.build();
+
+        // Verify the result
+        val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
+
+        assertTrue(result.output.contains("No dependencies found in project"))
+        assertTrue(!outputFile.exists())
+    }
 }

@@ -154,13 +154,15 @@ open class DumpDependenciesTask : DefaultTask() {
         }
 
         try {
-            println("Writing dependency JSON to ${outputFile}")
-            logger.info("Writing dependency JSON to ${outputFile}")
-            outputFile.parentFile.mkdirs()
-            //outputFile.createNewFile()
-            mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, dependenciesJsonNode)
+            if (dependenciesJsonNode.size() > 0) {
+                logger.quiet("Writing dependency JSON to ${outputFile}")
+                outputFile.parentFile.mkdirs()
+                //outputFile.createNewFile()
+                mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, dependenciesJsonNode)
+            } else {
+                logger.quiet("No dependencies found in project.")
+            }
         } catch (e: IOException) {
-            e.printStackTrace()
             throw GradleException("Could not write output file", e)
         }
     }
