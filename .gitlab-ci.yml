@@ -1,0 +1,72 @@
+image: adoptopenjdk:8-jdk-hotspot
+
+variables:
+  GIT_SUBMODULE_STRATEGY: none
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  policy: pull
+  paths:
+    - "*/build/classes"
+    - "*/*/build/classes"
+    - "*/*/*/build/classes"
+    - ".gradle/wrapper"
+    - ".gradle/cache"
+
+stages:
+  - build
+  - test
+  - checks
+  - publish
+
+include:
+  - template: Jobs/Code-Quality.gitlab-ci.yml
+  - template: Security/License-Management.gitlab-ci.yml
+
+build:
+  stage: build
+
+  script: ./gradlew assemble
+
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    paths:
+      - "*/build/classes"
+      - "*/*/build/classes"
+      - "*/*/*/build/classes"
+      - ".gradle/wrapper"
+      - ".gradle/cache"
+
+test:
+  stage: test
+
+  script: ./gradlew check
+
+  artifacts:
+    reports:
+      junit:
+        - "*/*/*/TEST-*.xml"
+
+# This codequality block is needed to work around https://gitlab.com/gitlab-org/gitlab/issues/12274
+code_quality:
+  stage: checks
+
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+
+    paths: [gl-code-quality-report.json]
+    expire_in: 1 week
+
+license_management:
+  stage: checks
+
+publish:
+  stage: publish
+
+  script: ./gradlew publishPlugin
+
+  only:
+    - master
