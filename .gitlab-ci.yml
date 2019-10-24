@@ -23,7 +23,11 @@ stages:
 
 include:
   - template: Jobs/Code-Quality.gitlab-ci.yml
-  - template: Security/License-Management.gitlab-ci.yml
+  # Can't use License Management scanning until https://gitlab.com/gitlab-org/gitlab/issues/33639 is resolved
+  #- template: Security/License-Management.gitlab-ci.yml
+
+#license_management:
+#  stage: checks
 
 build:
   stage: build
@@ -60,8 +64,6 @@ code_quality:
     paths: [gl-code-quality-report.json]
     expire_in: 1 week
 
-license_management:
-  stage: checks
 
 publish:
   stage: publish

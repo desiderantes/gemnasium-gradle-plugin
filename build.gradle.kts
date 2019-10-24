@@ -14,6 +14,9 @@ plugins {
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.10.1"
     id("maven-publish")
+
+    id("jacoco")
+    id("com.github.ksoichiro.console.reporter") version "0.6.2"
 }
 
 repositories {
@@ -78,6 +81,10 @@ val functionalTest by tasks.creating(Test::class) {
 val check by tasks.getting(Task::class) {
     // Run the functional tests as part of `check`
     dependsOn(functionalTest)
+}
+
+tasks.named("reportCoverage") {
+    dependsOn("jacocoTestReport")
 }
 
 publishing {
