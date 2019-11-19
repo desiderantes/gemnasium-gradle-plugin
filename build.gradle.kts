@@ -7,7 +7,7 @@
  */
 
 group = "com.gemnasium"
-version = "0.2"
+version = "0.3"
 
 plugins {
     kotlin("jvm") version "1.3.50"
@@ -60,8 +60,8 @@ gradlePlugin {
 }
 
 pluginBundle {
-    website = "https://gitlab.com/stfs/gemnasium-gradle-plugin"
-    vcsUrl = "https://gitlab.com/stfs/gemnasium-gradle-plugin.git"
+    website = "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin"
+    vcsUrl = "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin.git"
     tags = listOf("gemnasium", "dependency", "dependencies", "dependency-check", "security", "gitlab")
 }
 
