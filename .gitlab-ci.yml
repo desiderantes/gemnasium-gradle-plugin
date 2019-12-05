@@ -67,6 +67,7 @@ code_quality:
 
 publish:
   stage: publish
+  when: manual
 
   script: ./gradlew publishPlugin
 
