@@ -12,7 +12,7 @@ version = "0.3.1"
 plugins {
     kotlin("jvm") version "1.3.50"
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "0.10.1"
+    id("com.gradle.plugin-publish") version "0.12.0"
     id("maven-publish")
 
     id("jacoco")
