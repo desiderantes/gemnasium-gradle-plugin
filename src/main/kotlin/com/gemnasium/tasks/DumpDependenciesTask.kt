@@ -137,6 +137,10 @@ open class DumpDependenciesTask : DefaultTask() {
             val resolutionResult = configuration.incoming.resolutionResult
             val root = resolutionResult.root
 
+            if (root.dependencies.filterIsInstance<UnresolvedDependencyResult>().isNotEmpty()) {
+                throw GradleException("Project has unresolved dependencies")
+            }
+
             // Keep track of all direct dependencies
             directDependencies.addAll(root.dependencies.map { it.requested.displayName })
 
@@ -160,7 +164,7 @@ open class DumpDependenciesTask : DefaultTask() {
                 //outputFile.createNewFile()
                 mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, dependenciesJsonNode)
             } else {
-                logger.quiet("No dependencies found in project.")
+                logger.quiet("No dependencies found in project")
             }
         } catch (e: IOException) {
             throw GradleException("Could not write output file", e)

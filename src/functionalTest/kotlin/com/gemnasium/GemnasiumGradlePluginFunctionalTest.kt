@@ -19,7 +19,6 @@ class GemnasiumGradlePluginFunctionalTest {
         projectDir.deleteRecursively()
         projectDir.mkdirs()
 
-        //val buildDirValue =
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
@@ -41,7 +40,6 @@ class GemnasiumGradlePluginFunctionalTest {
                 outputFileName = '${outputFileNameValue}'
             }
         """)
-        //println(buildFile.readText())
 
         // Run the build
         val runner = GradleRunner.create()
@@ -71,7 +69,6 @@ class GemnasiumGradlePluginFunctionalTest {
         projectDir.deleteRecursively()
         projectDir.mkdirs()
 
-        //val buildDirValue =
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
@@ -89,7 +86,6 @@ class GemnasiumGradlePluginFunctionalTest {
                 outputFileName = '${outputFileNameValue}'
             }
         """)
-        //println(buildFile.readText())
 
         // Run the build
         val runner = GradleRunner.create()
@@ -104,5 +100,46 @@ class GemnasiumGradlePluginFunctionalTest {
 
         assertTrue(result.output.contains("No dependencies found in project"))
         assertTrue(!outputFile.exists())
+    }
+
+
+    @Test fun `invalid dependency project exits with an error`() {
+        // Setup the test build
+        val projectDir = File("build/functionalTest")
+        projectDir.deleteRecursively()
+        projectDir.mkdirs()
+
+        val outputFileNameValue = "deps.json"
+        projectDir.resolve("settings.gradle").writeText("")
+        val buildFile = projectDir.resolve("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id('com.gemnasium.gradle-plugin')
+                id('java')
+            }
+            
+            repositories {
+                maven { url "https://example.com" }
+            }
+
+            dependencies {
+                compile group: 'fluff', name: 'invalid', version:'1.0.10'            
+            }
+
+            gemnasiumGradlePlugin {
+                outputFileName = '${outputFileNameValue}'
+            }
+        """)
+
+        // Run the build
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("gemnasiumDumpDependencies")
+        runner.withProjectDir(projectDir)
+
+        val result = runner.buildAndFail();
+
+        assertTrue(result.output.contains("Project has unresolved dependencies"))
     }
 }

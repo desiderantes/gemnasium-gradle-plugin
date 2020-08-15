@@ -26,7 +26,7 @@ This adds the `gemnasiumDumpDependencies` task to your project.
 
 ### Using an init-script
 
-The plugin can also be applied using the Gradle init-script 
+The plugin can also be applied using the Gradle init-script
 mechanism:
 https://docs.gradle.org/current/userguide/init_scripts.html
 
@@ -40,7 +40,7 @@ initscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.gemnasium:gradle-plugin:0.3'  // needs to refer to a specific version, no wildcards or meta-versions allowed
+        classpath 'com.gemnasium:gradle-plugin:0.3.1'  // needs to refer to a specific version, no wildcards or meta-versions allowed
     }
 }
 
@@ -49,7 +49,7 @@ allprojects {
   // class name in init-scripts:
   // https://github.com/gradle/gradle/issues/1322
   apply plugin: com.gemnasium.GemnasiumGradlePlugin
-  
+
   gemnasiumGradlePlugin {
     //outputDir = file('.')
     //outputFileName = 'gradle-dependencies.json'
@@ -110,9 +110,9 @@ gemnasiumGradlePlugin {
     //  * skipConfigurations
     //  * scanConfigurations
     //
-    // Specifying neither of them will result in all 
+    // Specifying neither of them will result in all
     // configurations being processed (whether or not
     // that includes test configurations depends on
-    // the value of skipTestGroups). 
+    // the value of skipTestGroups).
 }
 ```
