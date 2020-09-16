@@ -22,6 +22,8 @@ stages:
   - publish
 
 include:
+  - template: SAST.gitlab-ci.yml
+  - template: Dependency-Scanning.gitlab-ci.yml
   - template: Jobs/Code-Quality.gitlab-ci.yml
   # Can't use License Management scanning until https://gitlab.com/gitlab-org/gitlab/issues/33639 is resolved
   #- template: Security/License-Management.gitlab-ci.yml
@@ -64,6 +66,10 @@ code_quality:
     paths: [gl-code-quality-report.json]
     expire_in: 1 week
 
+dependency_scanning:
+  artifacts:
+    paths:
+      - gradle-dependencies.json
 
 publish:
   stage: publish
