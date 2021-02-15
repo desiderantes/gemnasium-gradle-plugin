@@ -4,6 +4,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: none
   GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
   GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  SECURE_LOG_LEVEL: "debug"
 
 cache:
   key: "$CI_COMMIT_REF_NAME"
@@ -34,7 +35,6 @@ include:
 
 build:
   stage: build
-
   script: ./gradlew assemble
 
   cache:
@@ -68,6 +68,8 @@ code_quality:
     expire_in: 1 week
 
 dependency_scanning:
+  before_script: # TODO: remove once https://gitlab.com/gitlab-org/gitlab/-/issues/321128 is unblocked
+    - rm -r manual-test
   artifacts:
     paths:
       - gradle-dependencies.json
