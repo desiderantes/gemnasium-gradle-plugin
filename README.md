@@ -116,3 +116,7 @@ gemnasiumGradlePlugin {
     // the value of skipTestGroups).
 }
 ```
+
+## Publishing
+
+Publishing to `plugins.gradle.org` is done via the [publish job](.gitlab-ci.yml#L77) and is triggered manually in the merged pipeline.
