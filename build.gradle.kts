@@ -10,13 +10,14 @@ group = "com.gemnasium"
 version = "0.3.3"
 
 plugins {
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.5.10"
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "0.12.0"
+    id("com.gradle.plugin-publish") version "0.15.0"
     id("maven-publish")
 
     id("jacoco")
-    id("com.github.ksoichiro.console.reporter") version "0.6.2"
+    // Broken for Gradle 7, see https://github.com/ksoichiro/gradle-console-reporter/issues/15
+    // id("com.github.ksoichiro.console.reporter") version "0.6.2"
 }
 
 repositories {
@@ -27,7 +28,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.9.10.8")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
 
     // Use the Kotlin test library.
     testImplementation(kotlin("test"))
@@ -83,9 +84,10 @@ val check by tasks.getting(Task::class) {
     dependsOn(functionalTest)
 }
 
-tasks.named("reportCoverage") {
-    dependsOn("jacocoTestReport")
-}
+// Broken for Gradle 7, see https://github.com/ksoichiro/gradle-console-reporter/issues/15
+//tasks.named("reportCoverage") {
+//    dependsOn("jacocoTestReport")
+//}
 
 publishing {
     publications {
