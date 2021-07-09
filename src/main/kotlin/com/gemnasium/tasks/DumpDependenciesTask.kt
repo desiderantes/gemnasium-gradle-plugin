@@ -22,7 +22,6 @@ import java.util.LinkedHashMap
 open class DumpDependenciesTask : DefaultTask() {
 
     companion object {
-        @Internal
         const val TASK_NAME = "gemnasiumDumpDependencies"
     }
 
@@ -232,7 +231,7 @@ open class DumpDependenciesTask : DefaultTask() {
         if (requested != null) {
             node.put("requirement", requested)
         }
-        node.set("parents", mapper.valueToTree(parents))
+        node.set<ObjectNode>("parents", mapper.valueToTree<ObjectNode>(parents))
         return node
     }
 

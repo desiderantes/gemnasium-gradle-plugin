@@ -33,7 +33,7 @@ class GemnasiumGradlePluginFunctionalTest {
             }
 
             dependencies {
-                compile group: 'org.aeonbits.owner', name: 'owner', version:'1.0.10'            
+                implementation group: 'org.aeonbits.owner', name: 'owner', version:'1.0.10'
             }
             
             gemnasiumGradlePlugin {
@@ -47,7 +47,7 @@ class GemnasiumGradlePluginFunctionalTest {
         runner.withPluginClasspath()
         runner.withArguments("gemnasiumDumpDependencies")
         runner.withProjectDir(projectDir)
-        val result = runner.build();
+        val result = runner.build()
 
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
@@ -93,7 +93,7 @@ class GemnasiumGradlePluginFunctionalTest {
         runner.withPluginClasspath()
         runner.withArguments("gemnasiumDumpDependencies")
         runner.withProjectDir(projectDir)
-        val result = runner.build();
+        val result = runner.build()
 
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
@@ -123,7 +123,7 @@ class GemnasiumGradlePluginFunctionalTest {
             }
 
             dependencies {
-                compile group: 'fluff', name: 'invalid', version:'1.0.10'            
+                implementation group: 'fluff', name: 'invalid', version:'1.0.10'
             }
 
             gemnasiumGradlePlugin {
@@ -138,7 +138,7 @@ class GemnasiumGradlePluginFunctionalTest {
         runner.withArguments("gemnasiumDumpDependencies")
         runner.withProjectDir(projectDir)
 
-        val result = runner.buildAndFail();
+        val result = runner.buildAndFail()
 
         assertTrue(result.output.contains("Project has unresolved dependencies"))
     }
