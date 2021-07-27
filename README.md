@@ -1,3 +1,5 @@
+This project's issue tracker has been disabled, if you wish to [create an issue or bug please follow these directions](/CONTRIBUTING.md#issue-tracker).
+
 # Gemnasium Gradle Plugin
 
 The Gemnasium Gradle plugin facilitates support for using Gemnasium to scan Gradle projects by providing a Gradle task that dumps Gradle project dependencies into a JSON file formatted in a way that Gemnasium can process.
