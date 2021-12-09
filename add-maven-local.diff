@@ -1,0 +1,10 @@
+--- /gemnasium-gradle-plugin-init.gradle	2021-12-02 08:49:44.257259000 +0000
++++ /gemnasium-gradle-plugin-init.gradle	2021-12-02 09:24:18.676557000 +0000
+@@ -1,5 +1,7 @@
+ initscript {
+   repositories {
++    mavenLocal()
++    mavenCentral()
+     flatDir {
+       dirs '/gradle-plugin-builder/build/libs'
+     }
