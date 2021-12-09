@@ -119,6 +119,165 @@ gemnasiumGradlePlugin {
 }
 ```
 
+## How to develop new features
+
+1. Clone this repo on your local machine:
+
+   ```shell
+   user@local $ git clone https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin.git /path/to/local/gemnasium-gradle-plugin
+   ```
+
+1. Run the `gemnasium-maven` Docker image on your local machine, mounting the path to the `gemnasium-gradle-plugin` repo from step `1.` inside the Docker container.
+
+   ```shell
+   user@local $ docker run -it --rm -v "/path/to/local/gemnasium-gradle-plugin:/gemnasium-gradle-plugin" \
+                  registry.gitlab.com/gitlab-org/security-products/analyzers/gemnasium-maven:2 /bin/bash
+   ```
+
+   We use the `gemnasium-maven` image because it satisfies the dependencies needed to build and run the `gemnasium-gradle-plugin`.
+
+1. Make changes to the `gemnasium-gradle-plugin` source code on your local development machine which you cloned in step `1.` to `/path/to/local/gemnasium-gradle-plugin`.
+
+   For example, we're going to change the behaviour of the plugin when a project has unresolved dependencies so that instead of outputting:
+
+   ```shell
+   Project has unresolved dependencies
+   ```
+
+   we include the number of unresolved dependencies:
+
+   ```shell
+   Project has 5 unresolved dependencies
+   ```
+
+   Modify the [walk function](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin.git/blob/0bb16fa/src/main/kotlin/com/gemnasium/tasks/DumpDependenciesTask.kt#L123-123) of the `gemnasium-gradle-plugin` to implement the desired behaviour:
+
+      ```diff
+      --- a/src/main/kotlin/com/gemnasium/tasks/DumpDependenciesTask.kt
+      +++ b/src/main/kotlin/com/gemnasium/tasks/DumpDependenciesTask.kt
+      @@ -137,7 +137,8 @@ open class DumpDependenciesTask : DefaultTask() {
+                   val root = resolutionResult.root
+
+                   if (root.dependencies.filterIsInstance<UnresolvedDependencyResult>().isNotEmpty()) {
+      -                throw GradleException("Project has unresolved dependencies")
+      +                val numUnresolvedDeps = root.dependencies.filterIsInstance<UnresolvedDependencyResult>().size
+      +                throw GradleException("Project has ${numUnresolvedDeps} unresolved dependencies")
+      ```
+
+1. Create the `gradle wrapper` in the `/gemnasium-gradle-plugin` project on the Docker container:
+
+   ```shell
+   root@docker:~# cd /gemnasium-gradle-plugin && gradle wrapper
+   ```
+
+1. Run the unit tests for the new code changes on the Docker container:
+
+   ```shell
+   root@docker:/gemnasium-gradle-plugin# ./gradlew check
+   ```
+
+   If a failure occurs, you can view the details by opening the kotlin report file in your web browser on your local machine:
+
+   ```
+   file:///path/to/local/gemnasium-gradle-plugin/build/reports/tests/functionalTest/index.html
+   ```
+
+1. Add new unit tests or update existing broken tests for the new features.
+
+1. Bump the version number and publish a new version of the plugin (see [Publishing](#publishing) for details).
+
+1. (Optional) Manually check the new code changes against a test project:
+
+   1. Install the `patch` commandline tool on the Docker container so we can modify the `gemnasium-gradle-plugin-init.gradle` init script used by `gemnasium-maven` to use the local maven repo:
+
+      ```shell
+      root@docker:/gemnasium-gradle-plugin# apt update && apt install -y patch
+      ```
+
+   1. Use the `patch` commandline tool installed in the Docker container to apply [this patch](https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin/-/raw/master/add-maven-local.diff) to the `/gemnasium-gradle-plugin-init.gradle` init script. This patch will update the init script to include `mavenCentral()` and `mavenLocal()`, so that the `gemnasium-gradle-plugin` can find its dependencies:
+
+      ```shell
+      root@docker:/gemnasium-gradle-plugin# patch -d/ -N -p0 -i /gemnasium-gradle-plugin/add-maven-local.diff
+      ```
+
+   1. Build and publish the updated plugin code to the local maven repository on the Docker container:
+
+      ```shell
+      root@docker:/gemnasium-gradle-plugin# ./gradlew publishToMavenLocal
+      ```
+
+   1. Create the `gradle wrapper` in the `/gradle-plugin-builder` directory on the Docker container:
+
+      ```shell
+      root@docker:/gemnasium-gradle-plugin# cd /gradle-plugin-builder/ && gradle wrapper
+      ```
+
+   1. Create a new invalid project on the Docker container:
+
+      ```shell
+      root@docker:/gradle-plugin-builder# mkdir /invalid-dep-project && cd /invalid-dep-project
+      root@docker:/invalid-dep-project# echo $'plugins {\n  id("java")\n}\nrepositories {\n  maven(url = "http://invalid.com")\n}\ndependencies {\n  implementation("junit:junit:4.13")\n}\n' > build.gradle.kts
+      ```
+
+    1. Execute the plugin against the new invalid project created above:
+
+       ```shell
+       root@docker:/invalid-dep-project# /gradle-plugin-builder/gradlew --init-script /gemnasium-gradle-plugin-init.gradle gemnasiumDumpDependencies
+       ```
+
+       Output:
+
+       ```shell
+       > Task :gemnasiumDumpDependencies FAILED
+
+       FAILURE: Build failed with an exception.
+
+       * What went wrong:
+       Execution failed for task ':gemnasiumDumpDependencies'.
+       > Project has 1 unresolved dependencies
+       ```
+
+       The output contains the new error message we implemented, as expected.
+
 ## Publishing
+
+Before publishing a new version of this plugin, please make sure to bump the version number in the following blocks of code:
+
+- [manual-test/maven/pom.xml](manual-test/maven/pom.xml)
+
+   ```xml
+   <build>
+     <plugins>
+       <plugin>
+         <groupId>com.gemnasium</groupId>
+         <artifactId>gemnasium-maven-plugin</artifactId>
+         <!-- change the following version -->
+         <version>0.3.5</version>
+   ```
+
+- [README.md](README.md)
+
+   ```
+   initscript {
+       repositories {
+           jcenter()
+           mavenCentral()
+           maven { url "https://plugins.gradle.org/m2/" }
+       }
+       dependencies {
+           // change the following version
+           classpath 'com.gemnasium:gradle-plugin:0.3.5'
+       }
+   }
+   ```
+
+- [build.gradle.kts](build.gradle.kts)
+
+
+   ```
+   group = "com.gemnasium"
+   // change the following version
+   version = "0.3.5"
+   ```
 
 Publishing to `plugins.gradle.org` is done via the [publish job](.gitlab-ci.yml#L77) and is triggered manually in the merged pipeline.
