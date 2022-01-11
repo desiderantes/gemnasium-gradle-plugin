@@ -206,6 +206,8 @@ gemnasiumGradlePlugin {
       root@docker:/gemnasium-gradle-plugin# ./gradlew publishToMavenLocal
       ```
 
+       **Note:** In order for the modified plugin which has been published to the local maven repository in the above step to take precedence over the remote [gemnasium-gradle-plugin](https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin), the version value in [build.gradle.kts](build.gradle.kts#L10) must not be changed. If you change the `version` value in `build.gradle.kts`, then _the remote_ [gemnasium-gradle-plugin](https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin) will be used in step `6. Execute the plugin against the new invalid project created above` below instead of the modified _local plugin_.
+
    1. Create the `gradle wrapper` in the `/gradle-plugin-builder` directory on the Docker container:
 
       ```shell
