@@ -135,9 +135,13 @@ open class DumpDependenciesTask : DefaultTask() {
         }.forEach { configuration ->
             val resolutionResult = configuration.incoming.resolutionResult
             val root = resolutionResult.root
+            val unresolvedDeps = root.dependencies.filterIsInstance<UnresolvedDependencyResult>()
 
-            if (root.dependencies.filterIsInstance<UnresolvedDependencyResult>().isNotEmpty()) {
-                throw GradleException("Project has unresolved dependencies")
+            if (unresolvedDeps.isNotEmpty()) {
+                val unresolvedDepNames = unresolvedDeps.map { it.requested.displayName }
+                val unresolvedDepNamesFormatted = unresolvedDepNames.joinToString(separator = ", ")
+
+                throw GradleException("Project has ${unresolvedDeps.size} unresolved dependencies: ${unresolvedDepNamesFormatted}")
             }
 
             // Keep track of all direct dependencies

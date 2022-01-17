@@ -8,6 +8,7 @@ import java.io.File
 import org.gradle.testkit.runner.GradleRunner
 import kotlin.test.Test
 import kotlin.test.assertTrue
+import kotlin.test.assertContains
 
 /**
  * A simple functional test for the 'com.gemnasium.greeting' plugin.
@@ -27,7 +28,7 @@ class GemnasiumGradlePluginFunctionalTest {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
             }
-            
+
             repositories {
                 mavenCentral()
             }
@@ -35,7 +36,7 @@ class GemnasiumGradlePluginFunctionalTest {
             dependencies {
                 implementation group: 'org.aeonbits.owner', name: 'owner', version:'1.0.10'
             }
-            
+
             gemnasiumGradlePlugin {
                 outputFileName = '${outputFileNameValue}'
             }
@@ -52,7 +53,7 @@ class GemnasiumGradlePluginFunctionalTest {
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
 
-        assertTrue(result.output.contains("Writing dependency JSON to"))
+        assertContains(result.output, "Writing dependency JSON to")
         assertTrue(outputFile.exists())
 
         // Verify that output file contains valid JSON content
@@ -60,7 +61,7 @@ class GemnasiumGradlePluginFunctionalTest {
         while (parser.nextToken() != null) {}
 
         // Verify that the dependency we had in our gradle project is in the output file
-        assertTrue(outputFile.readText().contains("org.aeonbits.owner"))
+        assertContains(outputFile.readText(), "org.aeonbits.owner")
     }
 
     @Test fun `empty project does not produce output file`() {
@@ -77,7 +78,7 @@ class GemnasiumGradlePluginFunctionalTest {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
             }
-            
+
             repositories {
                 mavenCentral()
             }
@@ -98,7 +99,7 @@ class GemnasiumGradlePluginFunctionalTest {
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
 
-        assertTrue(result.output.contains("No dependencies found in project"))
+        assertContains(result.output, "No dependencies found in project")
         assertTrue(!outputFile.exists())
     }
 
@@ -117,13 +118,14 @@ class GemnasiumGradlePluginFunctionalTest {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
             }
-            
+
             repositories {
                 maven { url "https://example.com" }
             }
 
             dependencies {
                 implementation group: 'fluff', name: 'invalid', version:'1.0.10'
+                implementation group: 'fuzz', name: 'broken', version:'2.1.20'
             }
 
             gemnasiumGradlePlugin {
@@ -140,6 +142,6 @@ class GemnasiumGradlePluginFunctionalTest {
 
         val result = runner.buildAndFail()
 
-        assertTrue(result.output.contains("Project has unresolved dependencies"))
+        assertContains(result.output, "Project has 2 unresolved dependencies: fluff:invalid:1.0.10, fuzz:broken:2.1.20")
     }
 }
