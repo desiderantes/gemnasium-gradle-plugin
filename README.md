@@ -20,7 +20,7 @@ https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin
 The plugin can be directly applied as a plugin to your Gradle
 project:
 
-```
+```shell
 apply plugin: 'com.gemnasium.gradle-plugin'
 ```
 
@@ -66,7 +66,7 @@ To use that you would use the `--init-script` parameter in your
 `gradle` command. Assuming you save the above init script as `gl-gemnasium-init.gradle` in the root directory of your
 Gradle project, you could execute the plugin task like this:
 
-```
+```shell
 ./gradlew --init-script gl-gemnasium-init.gradle gemnasiumDumpDependencies
 ```
 
@@ -74,7 +74,7 @@ Gradle project, you could execute the plugin task like this:
 
 The plugin adds a single task to your Gradle project:
 
-```
+```shell
 ./gradlew gemnasiumDumpDependencies
 ```
 
@@ -86,7 +86,7 @@ You can customize the name/location of the JSON file and configure the behavior 
 
 The plugin can be configured via a Gradle extension block:
 
-```
+```groovy
 gemnasiumGradlePlugin {
     // Configure the output file name/location
     // Defaults to: <build_dir>/reports/gradle-dependencies.json
@@ -178,7 +178,7 @@ gemnasiumGradlePlugin {
 
    If a failure occurs, you can view the details by opening the kotlin report file in your web browser on your local machine:
 
-   ```
+   ```shell
    file:///path/to/local/gemnasium-gradle-plugin/build/reports/tests/functionalTest/index.html
    ```
 
@@ -203,10 +203,12 @@ gemnasiumGradlePlugin {
    1. Build and publish the updated plugin code to the local maven repository on the Docker container:
 
       ```shell
-      root@docker:/gemnasium-gradle-plugin# ./gradlew publishToMavenLocal
+      root@docker:/gemnasium-gradle-plugin# /gemnasium-gradle-plugin/gradlew -p /gemnasium-gradle-plugin/ publishToMavenLocal
       ```
 
-       **Note:** In order for the modified plugin which has been published to the local maven repository in the above step to take precedence over the remote [gemnasium-gradle-plugin](https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin), the version value in [build.gradle.kts](build.gradle.kts#L10) must not be changed. If you change the `version` value in `build.gradle.kts`, then _the remote_ [gemnasium-gradle-plugin](https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin) will be used in step `6. Execute the plugin against the new invalid project created above` below instead of the modified _local plugin_.
+       **Note:** In order for the modified plugin which has been published to the local maven repository in the above step to take precedence over the remote [gemnasium-gradle-plugin](https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin), the version value in [build.gradle.kts](build.gradle.kts#L10) must match the one specified in the `dependencies { classpath 'com.gemnasium:gradle-plugin:<VERSION>' }` block of the `/gemnasium-gradle-plugin-init.gradle` file in the `gemnasium-maven` Docker image that you're currently running.
+
+       If you change the `version` value in `build.gradle.kts`, then _the remote_ [gemnasium-gradle-plugin](https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin) will be used in step `6. Execute the plugin against the...` below instead of the modified _local plugin_.
 
    1. Create the `gradle wrapper` in the `/gradle-plugin-builder` directory on the Docker container:
 
@@ -221,25 +223,27 @@ gemnasiumGradlePlugin {
       root@docker:/invalid-dep-project# echo $'plugins {\n  id("java")\n}\nrepositories {\n  maven(url = "http://invalid.com")\n}\ndependencies {\n  implementation("junit:junit:4.13")\n}\n' > build.gradle.kts
       ```
 
-    1. Execute the plugin against the new invalid project created above:
+   1. Execute the plugin against the new invalid project created above:
 
-       ```shell
-       root@docker:/invalid-dep-project# /gradle-plugin-builder/gradlew --init-script /gemnasium-gradle-plugin-init.gradle gemnasiumDumpDependencies
-       ```
+      ```shell
+      root@docker:/invalid-dep-project# /gradle-plugin-builder/gradlew --init-script /gemnasium-gradle-plugin-init.gradle gemnasiumDumpDependencies
+      ```
 
-       Output:
+      Output:
 
-       ```shell
-       > Task :gemnasiumDumpDependencies FAILED
+      ```shell
+      > Task :gemnasiumDumpDependencies FAILED
 
-       FAILURE: Build failed with an exception.
+      FAILURE: Build failed with an exception.
 
-       * What went wrong:
-       Execution failed for task ':gemnasiumDumpDependencies'.
-       > Project has 1 unresolved dependencies
-       ```
+      * What went wrong:
+      Execution failed for task ':gemnasiumDumpDependencies'.
+      > Project has 1 unresolved dependencies
+      ```
 
-       The output contains the new error message we implemented, as expected.
+      The output contains the new error message we implemented, as expected.
+
+   1. If you make further changes to the source code in `/gemnasium-gradle-plugin` and want to execute the modified plugin against the local test project, you'll need to run the `publishToMavenlocal` command as explained in step `3. Build and publish the updated plugin code...` above to re-compile and publish the updated plugin to the local maven repository.
 
 ## Publishing
 
