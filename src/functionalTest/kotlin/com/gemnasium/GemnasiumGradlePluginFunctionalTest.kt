@@ -9,6 +9,7 @@ import org.gradle.testkit.runner.GradleRunner
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertContains
+import kotlin.test.assertEquals
 
 /**
  * A simple functional test for the 'com.gemnasium.greeting' plugin.
@@ -143,5 +144,56 @@ class GemnasiumGradlePluginFunctionalTest {
         val result = runner.buildAndFail()
 
         assertContains(result.output, "Project has 2 unresolved dependencies: fluff:invalid:1.0.10, fuzz:broken:2.1.20")
+    }
+
+    @Test fun `outputs all dependencies`() {
+        // Setup the test build
+        val projectDir = File("build/functionalTest")
+        projectDir.deleteRecursively()
+        projectDir.mkdirs()
+
+        val outputFileNameValue = "deps.json"
+        projectDir.resolve("settings.gradle").writeText("")
+        val buildFile = projectDir.resolve("build.gradle")
+        buildFile.writeText("""
+            plugins {
+                id('com.gemnasium.gradle-plugin')
+                id('java')
+            }
+
+            repositories {
+                mavenCentral()
+            }
+
+            dependencies {
+                implementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2"
+            }
+
+            gemnasiumGradlePlugin {
+                outputFileName = '${outputFileNameValue}'
+            }
+        """)
+
+        // Run the build
+        val runner = GradleRunner.create()
+        runner.forwardOutput()
+        runner.withPluginClasspath()
+        runner.withArguments("gemnasiumDumpDependencies")
+        runner.withProjectDir(projectDir)
+        val result = runner.build()
+
+        // Verify the result
+        val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
+        val fixtureFile = File("fixtures/all-dependencies/log4j-deps.json")
+
+        assertTrue(result.output.contains("Writing dependency JSON to"))
+        assertTrue(outputFile.exists())
+
+        // Verify that output file contains valid JSON content
+        val parser = ObjectMapper().factory.createParser(outputFile)
+        while (parser.nextToken() != null) {}
+
+        // Verify that the dependency we had in our gradle project is in the output file
+        assertEquals(outputFile.readText(), fixtureFile.readText())
     }
 }

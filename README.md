@@ -42,7 +42,7 @@ initscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.gemnasium:gradle-plugin:0.3.5'  // needs to refer to a specific version, no wildcards or meta-versions allowed
+        classpath 'com.gemnasium:gradle-plugin:0.3.6'  // needs to refer to a specific version, no wildcards or meta-versions allowed
     }
 }
 
@@ -258,7 +258,7 @@ Before publishing a new version of this plugin, please make sure to bump the ver
          <groupId>com.gemnasium</groupId>
          <artifactId>gemnasium-maven-plugin</artifactId>
          <!-- change the following version -->
-         <version>0.3.5</version>
+         <version>1.0.0</version>
    ```
 
 - [README.md](README.md)
@@ -272,18 +272,17 @@ Before publishing a new version of this plugin, please make sure to bump the ver
        }
        dependencies {
            // change the following version
-           classpath 'com.gemnasium:gradle-plugin:0.3.5'
+           classpath 'com.gemnasium:gradle-plugin:1.0.0'
        }
    }
    ```
 
 - [build.gradle.kts](build.gradle.kts)
 
-
    ```
    group = "com.gemnasium"
    // change the following version
-   version = "0.3.5"
+   version = "1.0.0"
    ```
 
 Publishing to `plugins.gradle.org` is done via the [publish job](.gitlab-ci.yml#L77) and is triggered manually in the merged pipeline.
