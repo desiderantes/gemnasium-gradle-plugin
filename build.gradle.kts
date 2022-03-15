@@ -7,7 +7,7 @@
  */
 
 group = "com.gemnasium"
-version = "0.3.5"
+version = "1.0.0"
 
 plugins {
     kotlin("jvm") version "1.5.10"
