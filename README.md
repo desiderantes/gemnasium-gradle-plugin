@@ -42,7 +42,7 @@ initscript {
         maven { url "https://plugins.gradle.org/m2/" }
     }
     dependencies {
-        classpath 'com.gemnasium:gradle-plugin:0.3.6'  // needs to refer to a specific version, no wildcards or meta-versions allowed
+        classpath 'com.gemnasium:gradle-plugin:1.0.0'  // needs to refer to a specific version, no wildcards or meta-versions allowed
     }
 }
 
