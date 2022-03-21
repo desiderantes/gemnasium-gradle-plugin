@@ -127,6 +127,7 @@ open class DumpDependenciesTask : DefaultTask() {
         }
 
         val directDependencies = HashSet<String>()
+        val processedDependencies = HashSet<String>()
         val configurationDependencies = LinkedHashMap<Configuration, Set<DependencyResult>>()
 
         project.configurations.filter {
@@ -156,7 +157,7 @@ open class DumpDependenciesTask : DefaultTask() {
         // Finally process all configuration dependencies recursively
         configurationDependencies.forEach { (configuration, dependencies) ->
             traverseDependencies(mapper, dependenciesJsonNode, ArrayList(),
-                    directDependencies, configuration, dependencies)
+                    directDependencies, processedDependencies, configuration, dependencies)
         }
 
         try {
@@ -175,7 +176,7 @@ open class DumpDependenciesTask : DefaultTask() {
 
     private fun traverseDependencies(mapper: ObjectMapper, dependenciesJsonNode: ArrayNode,
                                      parents: List<String>, directDependencies: Set<String>,
-                                     configuration: Configuration,
+                                     processedDependencies: MutableSet<String>, configuration: Configuration,
                                      dependencies: Set<DependencyResult>) {
         for (dependency in dependencies) {
             if (dependency is ResolvedDependencyResult) {
@@ -183,6 +184,16 @@ open class DumpDependenciesTask : DefaultTask() {
                 val componentIdentifier = componentResult.id
                 val componentName = componentIdentifier.displayName
                 val isDirectDependency = isDirectDependency(parents)
+                val scopedComponentName = "${configuration.name}:${componentName}"
+
+                // Skip dependencies in the current scope that have already been processed.
+                // This avoids an infinite loop caused by circular dependencies
+                if (processedDependencies.contains(scopedComponentName)) {
+                    continue
+                }
+
+                // Add this dependency to our list and mark it as processed
+                processedDependencies.add(scopedComponentName)
 
                 val moduleVersion = componentResult.moduleVersion
                 if (moduleVersion != null) {
@@ -200,7 +211,7 @@ open class DumpDependenciesTask : DefaultTask() {
                 nextGeneration.add(componentName)
 
                 traverseDependencies(mapper, dependenciesJsonNode, nextGeneration, directDependencies,
-                        configuration, componentResult.dependencies)
+                        processedDependencies, configuration, componentResult.dependencies)
             } else if (dependency is UnresolvedDependencyResult) {
                 val componentSelector = dependency.attempted
                 logger.debug("Ignoring unresolved dependency: " + componentSelector.displayName)
