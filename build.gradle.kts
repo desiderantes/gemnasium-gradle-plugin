@@ -7,10 +7,10 @@
  */
 
 group = "com.gemnasium"
-version = "1.0.1"
+version = "1.0.2"
 
 plugins {
-    kotlin("jvm") version "1.5.10"
+    kotlin("jvm") version "1.6.10"
     id("java-gradle-plugin")
     id("com.gradle.plugin-publish") version "0.15.0"
     id("maven-publish")
