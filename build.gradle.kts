@@ -7,7 +7,7 @@
  */
 
 group = "com.gemnasium"
-version = "1.0.2"
+version = "1.0.3"
 
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.7")
 
     // Use the Kotlin test library.
     testImplementation(kotlin("test"))

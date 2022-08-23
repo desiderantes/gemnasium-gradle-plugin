@@ -68,6 +68,8 @@ code_quality:
     expire_in: 1 week
 
 dependency_scanning:
+  variables:
+    DS_JAVA_VERSION: 11
   before_script: # TODO: remove once https://gitlab.com/gitlab-org/gitlab/-/issues/321128 is unblocked
     - rm -r manual-test
   artifacts:
