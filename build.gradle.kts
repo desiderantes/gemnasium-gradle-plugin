@@ -7,34 +7,30 @@
  */
 
 group = "com.gemnasium"
-version = "1.0.3"
+version = "1.0.4"
 
 plugins {
-    kotlin("jvm") version "1.6.10"
+    kotlin("jvm") version libs.versions.kotlin
     id("java-gradle-plugin")
-    id("com.gradle.plugin-publish") version "0.15.0"
+    alias(libs.plugins.gradle.publish)
     id("maven-publish")
-
+    `jvm-test-suite`
+    `java-test-fixtures`
     id("jacoco")
     // Broken for Gradle 7, see https://github.com/ksoichiro/gradle-console-reporter/issues/15
     // id("com.github.ksoichiro.console.reporter") version "0.6.2"
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.7")
-
-    // Use the Kotlin test library.
-    testImplementation(kotlin("test"))
-
-    // Use the Kotlin JUnit integration.
-    testImplementation(kotlin("test-junit"))
-
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.0")
+    implementation(gradleApi())
+    implementation(gradleKotlinDsl())
+    api(libs.jackson.databind)
 }
 
 fun checkAndSetProperty( prop: String, value: String? ){
@@ -47,40 +43,70 @@ fun checkAndSetProperty( prop: String, value: String? ){
 checkAndSetProperty("gradle.publish.key", System.getenv("GRADLE_PUBLISH_KEY"))
 checkAndSetProperty("gradle.publish.secret", System.getenv("GRADLE_PUBLISH_SECRET"))
 
+
 gradlePlugin {
     plugins {
+        website = "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin"
+        vcsUrl = "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin.git"
         create("gemnasium-gradle-plugin") {
             id = "com.gemnasium.gradle-plugin"
             implementationClass = "com.gemnasium.GemnasiumGradlePlugin"
             displayName = "Gemnasium Gradle Plugin"
             description = "A Gradle plugin to produce a dependency report in JSON format that Gemnasium can use for a dependency vulnerability scan"
+            tags = listOf("gemnasium", "dependency", "dependencies", "dependency-check", "security", "gitlab")
+
         }
     }
 }
 
-pluginBundle {
-    website = "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin"
-    vcsUrl = "https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin.git"
-    tags = listOf("gemnasium", "dependency", "dependencies", "dependency-check", "security", "gitlab")
+
+
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useJUnitJupiter(libs.versions.junit)
+        }
+
+        register<JvmTestSuite>("functionalTest") {
+
+            testType = TestSuiteType.FUNCTIONAL_TEST
+
+            dependencies {
+                implementation(project())
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        shouldRunAfter(test)
+                    }
+                }
+            }
+        }
+
+        withType(JvmTestSuite::class) {
+            dependencies {
+                implementation(testFixtures(project()))
+                // Use the Kotlin test library.
+                implementation(libs.kotlin.test)
+
+                // Use the Kotlin JUnit integration.
+                implementation(libs.kotlin.junit5)
+
+                implementation(libs.kotest.runner)
+            }
+        }
+    }
 }
 
-// Add a source set for the functional test suite
-val functionalTestSourceSet = sourceSets.create("functionalTest") {
+tasks.named("check") {
+    dependsOn(testing.suites.named("functionalTest"))
 }
 
-gradlePlugin.testSourceSets(functionalTestSourceSet)
-configurations.getByName("functionalTestImplementation").extendsFrom(configurations.getByName("testImplementation"))
 
-// Add a task to run the functional tests
-val functionalTest by tasks.creating(Test::class) {
-    testClassesDirs = functionalTestSourceSet.output.classesDirs
-    classpath = functionalTestSourceSet.runtimeClasspath
-}
+gradlePlugin.testSourceSets(sourceSets.named("functionalTest").get())
 
-val check by tasks.getting(Task::class) {
-    // Run the functional tests as part of `check`
-    dependsOn(functionalTest)
-}
+
 
 // Broken for Gradle 7, see https://github.com/ksoichiro/gradle-console-reporter/issues/15
 //tasks.named("reportCoverage") {

@@ -6,6 +6,7 @@ package com.gemnasium
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.File
 import org.gradle.testkit.runner.GradleRunner
+import kotlin.io.path.toPath
 import kotlin.test.Test
 import kotlin.test.assertTrue
 import kotlin.test.assertContains
@@ -186,7 +187,7 @@ class GemnasiumGradlePluginFunctionalTest {
 
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
-        val fixtureFile = File("fixtures/nested-dependencies/deps.json")
+        val fixtureFile = this::class.java.getResource("/nested-dependencies/deps.json").readText()
 
         assertTrue(result.output.contains("Writing dependency JSON to"))
         assertTrue(outputFile.exists())
@@ -196,7 +197,7 @@ class GemnasiumGradlePluginFunctionalTest {
         while (parser.nextToken() != null) {}
 
         // Verify that the dependency we had in our gradle project is in the output file
-        assertEquals(outputFile.readText(), fixtureFile.readText())
+        assertEquals(fixtureFile, outputFile.readText())
     }
 
     @Test fun `handles circular dependencies`() {
@@ -237,7 +238,7 @@ class GemnasiumGradlePluginFunctionalTest {
 
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
-        val fixtureFile = File("fixtures/circular-dependencies/deps.json")
+        val fixtureFile = this::class.java.getResource("/circular-dependencies/deps.json").readText()
 
         assertTrue(result.output.contains("Writing dependency JSON to"))
         assertTrue(outputFile.exists())
@@ -247,6 +248,6 @@ class GemnasiumGradlePluginFunctionalTest {
         while (parser.nextToken() != null) {}
 
         // Verify that the dependency we had in our gradle project is in the output file
-        assertEquals(outputFile.readText(), fixtureFile.readText())
+        assertEquals(fixtureFile, outputFile.readText())
     }
 }

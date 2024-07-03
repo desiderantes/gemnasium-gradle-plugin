@@ -1,5 +1,8 @@
 package com.gemnasium.extension
 
+import com.gemnasium.renderer.Renderer
+import com.gemnasium.renderer.SimpleJsonRenderer
+import org.gradle.api.Action
 import org.gradle.api.Project
 import java.io.File
 
@@ -13,7 +16,13 @@ open class GemnasiumGradlePluginExtension (project : Project) {
      * The output directory into which the generated JSON dependency file is put.
      * The default value is <project_build_dir>/reports/
      */
-    var outputDir = File(project.buildDir, "reports")
+    var outputDir = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir( "reports"))
+
+    /**
+     * The renderer to use to generate the dependency file.
+     * The default value is SimpleJsonRenderer.
+     */
+    var renderer: Renderer = SimpleJsonRenderer()
 
     /**
      * The name of the generated JSON dependency file.
@@ -49,7 +58,16 @@ open class GemnasiumGradlePluginExtension (project : Project) {
     var skipConfigurations = listOf<String>()
 
     /**
-     * Whether or not to skip the execution of the plugin tasks.
+     * Whether to skip the execution of the plugin tasks.
      */
     var skip = false
+
+    /**
+     * Configures and adds a Simple JSON renderer.
+     */
+    fun simpleJsonRenderer (action: Action<SimpleJsonRenderer>) {
+        val jsonRenderer = SimpleJsonRenderer()
+        action.execute(jsonRenderer)
+        renderer = jsonRenderer
+    }
 }

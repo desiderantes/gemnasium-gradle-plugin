@@ -1,23 +1,19 @@
 package com.gemnasium.tasks
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ArrayNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.gemnasium.extension.GemnasiumGradlePluginExtension
+import com.gemnasium.model.DependencyNode
+import com.gemnasium.renderer.Renderer
+import com.gemnasium.renderer.SimpleJsonRenderer
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
-import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ModuleComponentSelector
 import org.gradle.api.artifacts.result.DependencyResult
 import org.gradle.api.artifacts.result.ResolvedDependencyResult
 import org.gradle.api.artifacts.result.UnresolvedDependencyResult
-import org.gradle.api.tasks.*
-import java.io.File
+import org.gradle.api.file.RegularFile
+import org.gradle.api.tasks.TaskAction
 import java.io.IOException
-import java.util.ArrayList
-import java.util.HashSet
-import java.util.LinkedHashMap
 
 open class DumpDependenciesTask : DefaultTask() {
 
@@ -28,11 +24,15 @@ open class DumpDependenciesTask : DefaultTask() {
     // The @OutputFile annotation is disabled until I find a way to specify an input dependency on the Gradle project
     // itself. Currently, the output file will not get re-generated if the dependencies of the project change so it's
     // better to not specify any inputs/outputs to force gradle to always consider this task out-of-date.
-    private val outputFile: File
+    private val outputFile: RegularFile
     //@OutputFile
     get() {
         val ext = project.extensions.getByType(GemnasiumGradlePluginExtension::class.java)
-        return File(ext.outputDir, ext.outputFileName)
+        return ext.outputDir.file(ext.outputFileName).get()
+    }
+
+    private val renderer: Renderer by lazy {
+        project.extensions.getByType(GemnasiumGradlePluginExtension::class.java).renderer
     }
 
 
@@ -111,7 +111,7 @@ open class DumpDependenciesTask : DefaultTask() {
     }
 
     /**
-     * Determines if the onfiguration can be resolved
+     * Determines if the configuration can be resolved
      * @param configuration the configuration to inspect
      * @return true if the configuration can be resolved; otherwise false
      */
@@ -122,7 +122,7 @@ open class DumpDependenciesTask : DefaultTask() {
     @TaskAction
     internal fun walk() {
         if (project.extensions.findByType(GemnasiumGradlePluginExtension::class.java)!!.skip) {
-            logger.lifecycle("Skipping ${TASK_NAME}")
+            logger.lifecycle("Skipping $TASK_NAME")
             return
         }
 
@@ -141,7 +141,7 @@ open class DumpDependenciesTask : DefaultTask() {
                 val unresolvedDepNames = unresolvedDeps.map { it.requested.displayName }
                 val unresolvedDepNamesFormatted = unresolvedDepNames.joinToString(separator = ", ")
 
-                throw GradleException("Project has ${unresolvedDeps.size} unresolved dependencies: ${unresolvedDepNamesFormatted}")
+                throw GradleException("Project has ${unresolvedDeps.size} unresolved dependencies: $unresolvedDepNamesFormatted")
             }
 
             // Keep track of all direct dependencies
@@ -151,21 +151,22 @@ open class DumpDependenciesTask : DefaultTask() {
             configurationDependencies[configuration] = root.dependencies
         }
 
-        val mapper = ObjectMapper()
-        val dependenciesJsonNode = mapper.createArrayNode()
+        val dependenciesList = ArrayList<DependencyNode>()
 
         // Finally process all configuration dependencies recursively
         configurationDependencies.forEach { (configuration, dependencies) ->
-            traverseDependencies(mapper, dependenciesJsonNode, ArrayList(),
+            traverseDependencies(dependenciesList, ArrayList(),
                     directDependencies, processedDependencies, configuration, dependencies)
         }
 
         try {
-            if (dependenciesJsonNode.size() > 0) {
-                logger.quiet("Writing dependency JSON to ${outputFile}")
-                outputFile.parentFile.mkdirs()
-                //outputFile.createNewFile()
-                mapper.writerWithDefaultPrettyPrinter().writeValue(outputFile, dependenciesJsonNode)
+            if (dependenciesList.size > 0) {
+                outputFile.asFile.let {
+                    logger.quiet("Writing dependency JSON to $it")
+                    it.parentFile.mkdirs()
+                    renderer.addDependencies(dependenciesList)
+                    renderer.writeToFile(it)
+                }
             } else {
                 logger.quiet("No dependencies found in project")
             }
@@ -174,10 +175,10 @@ open class DumpDependenciesTask : DefaultTask() {
         }
     }
 
-    private fun traverseDependencies(mapper: ObjectMapper, dependenciesJsonNode: ArrayNode,
-                                     parents: List<String>, directDependencies: Set<String>,
-                                     processedDependencies: MutableSet<String>, configuration: Configuration,
-                                     dependencies: Set<DependencyResult>) {
+    private fun traverseDependencies( dependenciesList: ArrayList<DependencyNode>,
+        parents: List<String>, directDependencies: Set<String>,
+        processedDependencies: MutableSet<String>, configuration: Configuration,
+        dependencies: Set<DependencyResult>) {
         for (dependency in dependencies) {
             if (dependency is ResolvedDependencyResult) {
                 val componentResult = dependency.selected
@@ -201,39 +202,22 @@ open class DumpDependenciesTask : DefaultTask() {
                     if (dependency.getRequested() is ModuleComponentSelector) {
                         requested = (dependency.getRequested() as ModuleComponentSelector).version
                     }
-                    val node = createDependencyNode(mapper, configuration.name, moduleVersion.group,
+                    val node = DependencyNode(configuration.name, moduleVersion.group,
                             moduleVersion.name, moduleVersion.version, isDirectDependency, requested, parents)
-                    dependenciesJsonNode.add(node)
+                    dependenciesList.add(node)
                 }
 
                 val nextGeneration = ArrayList(parents)
 
                 nextGeneration.add(componentName)
 
-                traverseDependencies(mapper, dependenciesJsonNode, nextGeneration, directDependencies,
+                traverseDependencies( dependenciesList, nextGeneration, directDependencies,
                         processedDependencies, configuration, componentResult.dependencies)
             } else if (dependency is UnresolvedDependencyResult) {
                 val componentSelector = dependency.attempted
                 logger.debug("Ignoring unresolved dependency: " + componentSelector.displayName)
             }
         }
-    }
-
-    private fun createDependencyNode(mapper: ObjectMapper, configuration: String, groupId: String, artifactId: String,
-                                     version: String, isDirectDependency: Boolean, requested: String?,
-                                     parents: List<String>): ObjectNode {
-        val node = mapper.createObjectNode()
-        node.put("groupId", groupId)
-        node.put("artifactId", artifactId)
-        node.put("version", version)
-
-        node.put("scope", configuration)
-        node.put("transitive", !isDirectDependency)
-        if (requested != null) {
-            node.put("requirement", requested)
-        }
-        node.set<ObjectNode>("parents", mapper.valueToTree<ObjectNode>(parents))
-        return node
     }
 
     private fun isDirectDependency(parents: List<String>): Boolean {

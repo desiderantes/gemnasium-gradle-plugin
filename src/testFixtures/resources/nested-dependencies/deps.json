@@ -26,38 +26,6 @@
   "groupId" : "org.slf4j",
   "artifactId" : "slf4j-api",
   "version" : "1.7.30",
-  "scope" : "default",
-  "transitive" : false,
-  "requirement" : "1.7.30",
-  "parents" : [ ]
-}, {
-  "groupId" : "org.apache.logging.log4j",
-  "artifactId" : "log4j-api",
-  "version" : "2.13.2",
-  "scope" : "default",
-  "transitive" : false,
-  "requirement" : "2.13.2",
-  "parents" : [ ]
-}, {
-  "groupId" : "org.apache.logging.log4j",
-  "artifactId" : "log4j-slf4j-impl",
-  "version" : "2.13.2",
-  "scope" : "default",
-  "transitive" : false,
-  "requirement" : "2.13.2",
-  "parents" : [ ]
-}, {
-  "groupId" : "org.apache.logging.log4j",
-  "artifactId" : "log4j-core",
-  "version" : "2.13.2",
-  "scope" : "default",
-  "transitive" : true,
-  "requirement" : "2.13.2",
-  "parents" : [ "org.apache.logging.log4j:log4j-slf4j-impl:2.13.2" ]
-}, {
-  "groupId" : "org.slf4j",
-  "artifactId" : "slf4j-api",
-  "version" : "1.7.30",
   "scope" : "runtimeClasspath",
   "transitive" : false,
   "requirement" : "1.7.30",
