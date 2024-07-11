@@ -4,24 +4,22 @@ these directions].
 
 == Gemnasium Gradle Plugin
 
-The Gemnasium Gradle plugin facilitates support for using Gemnasium to
-scan Gradle projects by providing a Gradle task that dumps Gradle
-project dependencies into a JSON file formatted in a way that Gemnasium
-can process.
+The Gemnasium Gradle plugin facilitates support for using Gemnasium to scan Gradle projects by providing a Gradle task
+that dumps Gradle project dependencies into a JSON file formatted in a way that Gemnasium can process.
 
-This plugin was developed in order to add dependency scanning support
-for Gradle projects to GitLab and will be used by the GitLab CI system
-for that purpose. As such, it will probably not be of much use to anyone
-else.
+This plugin was developed in order to add dependency scanning support for Gradle projects to GitLab and will be used by
+the GitLab CI system for that purpose.
 
-The implementation borrows heavily from the following projects: *
-https://github.com/jeremylong/dependency-check-gradle *
-https://github.com/gemnasium/gemnasium-maven-plugin
+As such, it will probably not be of much use to anyone else.
+
+The implementation borrows heavily from the following projects:
+
+- https://github.com/jeremylong/dependency-check-gradle
+- https://github.com/gemnasium/gemnasium-maven-plugin
 
 === How to install it?
 
-The plugin is published to the Gradle Plugin Repository
-https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin
+The plugin is published to the link:https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin[Gradle Plugin Repository]
 
 ==== Direct dependency
 
@@ -43,8 +41,7 @@ This adds the `+gemnasiumDumpDependencies+` task to your project.
 
 ==== Using an init-script
 
-The plugin can also be applied using the Gradle init-script mechanism:
-https://docs.gradle.org/current/userguide/init_scripts.html
+The plugin can also be applied using the link:https://docs.gradle.org/current/userguide/init_scripts.html[Gradle init-script mechanism:]
 
 Here is an example of an init-script that can be used:
 
@@ -78,9 +75,9 @@ allprojects {
 ----
 
 To use that you would use the `+--init-script+` parameter in your
-`+gradle+` command. Assuming you save the above init script as
-`+gl-gemnasium-init.gradle+` in the root directory of your Gradle
-project, you could execute the plugin task like this:
+`+gradle+` command.
+Assuming you save the above init script as
+`+gl-gemnasium-init.gradle+` in the root directory of your Gradle project, you could execute the plugin task like this:
 
 [source,shell]
 ----
@@ -96,11 +93,9 @@ The plugin adds a single task to your Gradle project:
 ./gradlew gemnasiumDumpDependencies
 ----
 
-This will create a JSON file containing information about your Gradle
-project’s dependencies.
+This will create a JSON file containing information about your Gradle project’s dependencies.
 
-You can customize the name/location of the JSON file and configure the
-behavior of the plugin (see xref:Configuration[Configuration] section).
+You can customize the name/location of the JSON file and configure the behavior of the plugin (see xref:Configuration[Configuration] section).
 
 === Configuration
 
@@ -149,8 +144,7 @@ gemnasiumGradlePlugin {
 ----
 user@local $ git clone https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin.git /path/to/local/gemnasium-gradle-plugin
 ----
-. Run the `+gemnasium-maven+` Docker image on your local machine,
-mounting the path to the `+gemnasium-gradle-plugin+` repo from step
+. Run the `+gemnasium-maven+` Docker image on your local machine, mounting the path to the `+gemnasium-gradle-plugin+` repo from step
 `+1.+` inside the Docker container.
 +
 [source,shell]
@@ -159,14 +153,11 @@ user@local $ docker run -it --rm -v "/path/to/local/gemnasium-gradle-plugin:/gem
                registry.gitlab.com/gitlab-org/security-products/analyzers/gemnasium-maven:2 /bin/bash
 ----
 +
-We use the `+gemnasium-maven+` image because it satisfies the
-dependencies needed to build and run the `+gemnasium-gradle-plugin+`.
-. Make changes to the `+gemnasium-gradle-plugin+` source code on your
-local development machine which you cloned in step `+1.+` to
+We use the `+gemnasium-maven+` image because it satisfies the dependencies needed to build and run the `+gemnasium-gradle-plugin+`.
+. Make changes to the `+gemnasium-gradle-plugin+` source code on your local development machine which you cloned in step `+1.+` to
 `+/path/to/local/gemnasium-gradle-plugin+`.
 +
-For example, we’re going to change the behaviour of the plugin when a
-project has unresolved dependencies so that instead of outputting:
+For example, we’re going to change the behaviour of the plugin when a project has unresolved dependencies so that instead of outputting:
 +
 [source,shell]
 ----
@@ -181,9 +172,8 @@ Project has 5 unresolved dependencies
 ----
 +
 Modify the
-link:src/main/kotlin/com/gemnasium/tasks/DumpDependenciesTask.kt#L144[walk
-function] of the `+gemnasium-gradle-plugin+` to implement the desired
-behaviour:
+link:src/main/kotlin/com/gemnasium/tasks/DumpDependenciesTask.kt#L144[walk function] of the `+gemnasium-gradle-plugin+`
+to implement the desired behaviour:
 +
 [source,diff]
 ----
@@ -211,62 +201,49 @@ root@docker:~# cd /gemnasium-gradle-plugin && gradle wrapper
 root@docker:/gemnasium-gradle-plugin# ./gradlew check
 ----
 +
-If a failure occurs, you can view the details by opening the kotlin
-report file in your web browser on your local machine:
+If a failure occurs, you can view the details by opening the kotlin report file in your web browser on your local machine:
 +
 [source,shell]
 ----
 file:///path/to/local/gemnasium-gradle-plugin/build/reports/tests/functionalTest/index.html
 ----
-. Add new unit tests or update existing broken tests for the new
-features.
+. Add new unit tests or update existing broken tests for the new features.
 . Bump the version number and publish a new version of the plugin (see
 xref:Publishing[Publishing] for details).
 . (Optional) Manually check the new code changes against a test project:
 [arabic]
-.. Install the `+patch+` commandline tool on the Docker container so we
-can modify the `+gemnasium-gradle-plugin-init.gradle+` init script used
-by `+gemnasium-maven+` to use the local maven repo:
+.. Install the `+patch+` commandline tool on the Docker container, so we can modify the `+gemnasium-gradle-plugin-init.gradle+` init script used by `+gemnasium-maven+` to use the local maven repo:
 +
 [source,shell]
 ----
 root@docker:/gemnasium-gradle-plugin# apt update && apt install -y patch
 ----
-.. Use the `+patch+` commandline tool installed in the Docker container
-to apply
+.. Use the `+patch+` commandline tool installed in the Docker container to apply
 https://gitlab.com/gitlab-org/security-products/analyzers/gemnasium-gradle-plugin/-/raw/master/add-maven-local.diff[this
-patch] to the `+/gemnasium-gradle-plugin-init.gradle+` init script. This
-patch will update the init script to include `+mavenCentral()+` and
-`+mavenLocal()+`, so that the `+gemnasium-gradle-plugin+` can find its
-dependencies:
+patch] to the `+/gemnasium-gradle-plugin-init.gradle+` init script.
+This patch will update the init script to include `+mavenCentral()+` and
+`+mavenLocal()+`, so that the `+gemnasium-gradle-plugin+` can find its dependencies:
 +
 [source,shell]
 ----
 root@docker:/gemnasium-gradle-plugin# patch -d/ -N -p0 -i /gemnasium-gradle-plugin/add-maven-local.diff
 ----
-.. Build and publish the updated plugin code to the local maven
-repository on the Docker container:
+.. Build and publish the updated plugin code to the local maven repository on the Docker container:
 +
 [source,shell]
 ----
 root@docker:/gemnasium-gradle-plugin# /gemnasium-gradle-plugin/gradlew -p /gemnasium-gradle-plugin/ publishToMavenLocal
 ----
 +
-*Note:* In order for the modified plugin which has been published to the
-local maven repository in the above step to take precedence over the
-remote
-https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin[gemnasium-gradle-plugin],
-the version value in  link:build.gradle.kts#L10[build.gradle.kts] must
-match the one specified in the
+*Note:* In order for the modified plugin which has been published to the local maven repository in the above step to take precedence over the remote
+https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin[gemnasium-gradle-plugin], the version value in  link:build.gradle.kts#L10[build.gradle.kts] must match the one specified in the
 `+dependencies { classpath 'com.gemnasium:gradle-plugin:<VERSION>' }+`
 block of the `+/gemnasium-gradle-plugin-init.gradle+` file in the
 `+gemnasium-maven+` Docker image that you’re currently running.
 +
-If you change the `+version+` value in `+build.gradle.kts+`, then _the
-remote_
+If you change the `+version+` value in `+build.gradle.kts+`, then _the remote_
 https://plugins.gradle.org/plugin/com.gemnasium.gradle-plugin[gemnasium-gradle-plugin]
-will be used in step `+6. Execute the plugin against the...+` below
-instead of the modified _local plugin_.
+will be used in step `+6. Execute the plugin against the...+` below instead of the modified _local plugin_.
 .. Create the `+gradle wrapper+` in the `+/gradle-plugin-builder+`
 directory on the Docker container:
 +
@@ -303,16 +280,13 @@ Execution failed for task ':gemnasiumDumpDependencies'.
 +
 The output contains the new error message we implemented, as expected.
 .. If you make further changes to the source code in
-`+/gemnasium-gradle-plugin+` and want to execute the modified plugin
-against the local test project, you’ll need to run the
+`+/gemnasium-gradle-plugin+` and want to execute the modified plugin against the local test project, you’ll need to run the
 `+publishToMavenlocal+` command as explained in step
-`+3. Build and publish the updated plugin code...+` above to re-compile
-and publish the updated plugin to the local maven repository.
+`+3. Build and publish the updated plugin code...+` above to re-compile and publish the updated plugin to the local maven repository.
 
 === Publishing
 
-Before publishing a new version of this plugin, please make sure to bump
-the version number in the following blocks of code:
+Before publishing a new version of this plugin, please make sure to bump the version number in the following blocks of code:
 
 * manual-test/maven/pom.xml
 +
@@ -331,7 +305,8 @@ the version number in the following blocks of code:
 ----
 * README.md
 +
-....
+[source,groovy]
+----
 initscript {
     repositories {
         jcenter()
@@ -343,15 +318,15 @@ initscript {
         classpath 'com.gemnasium:gradle-plugin:1.0.3'
     }
 }
-....
+----
 * build.gradle.kts
 +
-....
+[source,kotlin]
+----
 group = "com.gemnasium"
 // change the following version
 version = "1.0.3"
-....
+----
 
-Publishing to `+plugins.gradle.org+` is done via the
-link:.gitlab-ci.yml#L77[publish job] and is triggered manually in the
-merged pipeline.
+Publishing to `+plugins.gradle.org+` is done via the link:.gitlab-ci.yml#L77[publish job] and is triggered manually in
+the merged pipeline.
