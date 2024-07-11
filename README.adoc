@@ -1,7 +1,3 @@
-This project’s issue tracker has been disabled, if you wish to
-link:/CONTRIBUTING.md#issue-tracker[create an issue or bug please follow
-these directions].
-
 == Gemnasium Gradle Plugin
 
 The Gemnasium Gradle plugin facilitates support for using Gemnasium to scan Gradle projects by providing a Gradle task
