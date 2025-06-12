@@ -1,14 +1,15 @@
 package com.gemnasium.renderer
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.gemnasium.model.DependencyNode
 import java.io.File
 
 class SimpleJsonRenderer : Renderer {
 
-    private val mapper = ObjectMapper()
-    val dependencyNode = mapper.createArrayNode()
+    private val mapper = ObjectMapper().findAndRegisterModules()
+    val dependencyNode: ArrayNode = mapper.createArrayNode()!!
 
     override fun addDependencies(dependenciesList: Collection<DependencyNode>) {
 

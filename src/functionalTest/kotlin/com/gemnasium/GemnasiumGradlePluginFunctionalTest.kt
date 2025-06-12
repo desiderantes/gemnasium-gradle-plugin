@@ -4,19 +4,20 @@
 package com.gemnasium
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.io.File
+import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.GradleRunner
-import kotlin.io.path.toPath
-import kotlin.test.Test
-import kotlin.test.assertTrue
-import kotlin.test.assertContains
-import kotlin.test.assertEquals
+import java.io.File
 
 /**
  * A simple functional test for the 'com.gemnasium.greeting' plugin.
  */
-class GemnasiumGradlePluginFunctionalTest {
-    @Test fun `can run task`() {
+class GemnasiumGradlePluginFunctionalTest : AnnotationSpec() {
+
+    @Test
+    fun `can run task`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
         projectDir.deleteRecursively()
@@ -25,7 +26,8 @@ class GemnasiumGradlePluginFunctionalTest {
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
@@ -42,7 +44,8 @@ class GemnasiumGradlePluginFunctionalTest {
             gemnasiumGradlePlugin {
                 outputFileName = '${outputFileNameValue}'
             }
-        """)
+        """
+        )
 
         // Run the build
         val runner = GradleRunner.create()
@@ -55,18 +58,21 @@ class GemnasiumGradlePluginFunctionalTest {
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
 
-        assertContains(result.output, "Writing dependency JSON to")
-        assertTrue(outputFile.exists())
+        result.output shouldContain "Writing dependency JSON to"
+        outputFile.exists() shouldBe true
+
 
         // Verify that output file contains valid JSON content
         val parser = ObjectMapper().factory.createParser(outputFile)
-        while (parser.nextToken() != null) {}
+        while (parser.nextToken() != null) {
+        }
 
         // Verify that the dependency we had in our gradle project is in the output file
-        assertContains(outputFile.readText(), "org.aeonbits.owner")
+        outputFile.readText() shouldContain "org.aeonbits.owner"
     }
 
-    @Test fun `empty project does not produce output file`() {
+    @Test
+    fun `empty project does not produce output file`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
         projectDir.deleteRecursively()
@@ -75,7 +81,8 @@ class GemnasiumGradlePluginFunctionalTest {
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
@@ -88,7 +95,8 @@ class GemnasiumGradlePluginFunctionalTest {
             gemnasiumGradlePlugin {
                 outputFileName = '${outputFileNameValue}'
             }
-        """)
+        """
+        )
 
         // Run the build
         val runner = GradleRunner.create()
@@ -101,12 +109,13 @@ class GemnasiumGradlePluginFunctionalTest {
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
 
-        assertContains(result.output, "No dependencies found in project")
-        assertTrue(!outputFile.exists())
+        result.output shouldContain "No dependencies found in project"
+        outputFile.exists() shouldBe false
     }
 
 
-    @Test fun `invalid dependency project exits with an error`() {
+    @Test
+    fun `invalid dependency project exits with an error`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
         projectDir.deleteRecursively()
@@ -115,7 +124,8 @@ class GemnasiumGradlePluginFunctionalTest {
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
@@ -133,7 +143,8 @@ class GemnasiumGradlePluginFunctionalTest {
             gemnasiumGradlePlugin {
                 outputFileName = '${outputFileNameValue}'
             }
-        """)
+        """
+        )
 
         // Run the build
         val runner = GradleRunner.create()
@@ -144,10 +155,11 @@ class GemnasiumGradlePluginFunctionalTest {
 
         val result = runner.buildAndFail()
 
-        assertContains(result.output, "Project has 2 unresolved dependencies: fluff:invalid:1.0.10, fuzz:broken:2.1.20")
+        result.output shouldContain "Project has 2 unresolved dependencies: fluff:invalid:1.0.10, fuzz:broken:2.1.20"
     }
 
-    @Test fun `handles nested dependencies`() {
+    @Test
+    fun `handles nested dependencies`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
         projectDir.deleteRecursively()
@@ -156,7 +168,8 @@ class GemnasiumGradlePluginFunctionalTest {
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
@@ -175,7 +188,8 @@ class GemnasiumGradlePluginFunctionalTest {
             gemnasiumGradlePlugin {
                 outputFileName = '${outputFileNameValue}'
             }
-        """)
+        """
+        )
 
         // Run the build
         val runner = GradleRunner.create()
@@ -187,20 +201,22 @@ class GemnasiumGradlePluginFunctionalTest {
 
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
-        val fixtureFile = this::class.java.getResource("/nested-dependencies/deps.json").readText()
+        val fixtureFile = this::class.java.getResource("/nested-dependencies/deps.json")!!.readText()
 
-        assertTrue(result.output.contains("Writing dependency JSON to"))
-        assertTrue(outputFile.exists())
+        result.output shouldContain "Writing dependency JSON to"
+        outputFile.exists() shouldBe true
 
         // Verify that output file contains valid JSON content
         val parser = ObjectMapper().factory.createParser(outputFile)
-        while (parser.nextToken() != null) {}
+        while (parser.nextToken() != null) {
+        }
 
         // Verify that the dependency we had in our gradle project is in the output file
-        assertEquals(fixtureFile, outputFile.readText())
+        outputFile.readText() shouldBe fixtureFile
     }
 
-    @Test fun `handles circular dependencies`() {
+    @Test
+    fun `handles circular dependencies`() {
         // Setup the test build
         val projectDir = File("build/functionalTest")
         projectDir.deleteRecursively()
@@ -209,7 +225,8 @@ class GemnasiumGradlePluginFunctionalTest {
         val outputFileNameValue = "deps.json"
         projectDir.resolve("settings.gradle").writeText("")
         val buildFile = projectDir.resolve("build.gradle")
-        buildFile.writeText("""
+        buildFile.writeText(
+            """
             plugins {
                 id('com.gemnasium.gradle-plugin')
                 id('java')
@@ -226,7 +243,8 @@ class GemnasiumGradlePluginFunctionalTest {
             gemnasiumGradlePlugin {
                 outputFileName = '${outputFileNameValue}'
             }
-        """)
+        """
+        )
 
         // Run the build
         val runner = GradleRunner.create()
@@ -238,16 +256,17 @@ class GemnasiumGradlePluginFunctionalTest {
 
         // Verify the result
         val outputFile = File(projectDir, "build/reports/${outputFileNameValue}")
-        val fixtureFile = this::class.java.getResource("/circular-dependencies/deps.json").readText()
+        val fixtureFile = this::class.java.getResource("/circular-dependencies/deps.json")!!.readText()
 
-        assertTrue(result.output.contains("Writing dependency JSON to"))
-        assertTrue(outputFile.exists())
+        result.output shouldContain "Writing dependency JSON to"
+        outputFile.exists() shouldBe true
 
         // Verify that output file contains valid JSON content
         val parser = ObjectMapper().factory.createParser(outputFile)
-        while (parser.nextToken() != null) {}
+        while (parser.nextToken() != null) {
+        }
 
         // Verify that the dependency we had in our gradle project is in the output file
-        assertEquals(fixtureFile, outputFile.readText())
+        outputFile.readText() shouldBe fixtureFile
     }
 }

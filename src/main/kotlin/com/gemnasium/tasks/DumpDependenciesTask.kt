@@ -3,7 +3,6 @@ package com.gemnasium.tasks
 import com.gemnasium.extension.GemnasiumGradlePluginExtension
 import com.gemnasium.model.DependencyNode
 import com.gemnasium.renderer.Renderer
-import com.gemnasium.renderer.SimpleJsonRenderer
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -160,7 +159,7 @@ open class DumpDependenciesTask : DefaultTask() {
         }
 
         try {
-            if (dependenciesList.size > 0) {
+            if (dependenciesList.isNotEmpty()) {
                 outputFile.asFile.let {
                     logger.quiet("Writing dependency JSON to $it")
                     it.parentFile.mkdirs()

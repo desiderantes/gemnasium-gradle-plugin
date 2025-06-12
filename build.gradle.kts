@@ -63,13 +63,9 @@ gradlePlugin {
 
 testing {
     suites {
-        val test by getting(JvmTestSuite::class) {
-            useJUnitJupiter(libs.versions.junit)
-        }
+        val test by getting(JvmTestSuite::class)
 
         register<JvmTestSuite>("functionalTest") {
-
-            testType = TestSuiteType.FUNCTIONAL_TEST
 
             dependencies {
                 implementation(project())
@@ -85,6 +81,9 @@ testing {
         }
 
         withType(JvmTestSuite::class) {
+
+            useJUnitJupiter(libs.versions.junit)
+
             dependencies {
                 implementation(testFixtures(project()))
                 // Use the Kotlin test library.
@@ -92,6 +91,7 @@ testing {
 
                 // Use the Kotlin JUnit integration.
                 implementation(libs.kotlin.junit5)
+                implementation(libs.kotest.assertions)
 
                 implementation(libs.kotest.runner)
             }

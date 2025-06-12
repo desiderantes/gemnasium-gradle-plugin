@@ -4,20 +4,23 @@
 package com.gemnasium
 
 import com.gemnasium.tasks.DumpDependenciesTask
+import io.kotest.core.spec.style.AnnotationSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import org.gradle.testfixtures.ProjectBuilder
-import kotlin.test.Test
-import kotlin.test.assertNotNull
+
 
 /**
  * A simple unit test for the 'com.gemnasium.greeting' plugin.
  */
-class GemnasiumGradlePluginKotlinPluginTest {
-    @Test fun `plugin registers the dump dependencies task`() {
+class GemnasiumGradlePluginKotlinPluginTest : AnnotationSpec() {
+
+    @Test
+    fun `plugin registers the dump dependencies task`() {
         // Create a test project and apply the plugin
         val project = ProjectBuilder.builder().build()
         project.plugins.apply("com.gemnasium.gradle-plugin")
 
         // Verify that the project added the DumpDependenciesTask
-        assertNotNull(project.tasks.findByName(DumpDependenciesTask.TASK_NAME))
+        project.tasks.findByName(DumpDependenciesTask.TASK_NAME).shouldNotBeNull()
     }
 }

@@ -4,7 +4,6 @@ import com.gemnasium.renderer.Renderer
 import com.gemnasium.renderer.SimpleJsonRenderer
 import org.gradle.api.Action
 import org.gradle.api.Project
-import java.io.File
 
 open class GemnasiumGradlePluginExtension (project : Project) {
 
